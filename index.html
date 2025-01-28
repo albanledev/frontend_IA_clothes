@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Image for Prediction</title>
+</head>
+<body>
+    <h1>Upload your clothing image for prediction</h1>
+    
+    <!-- Input pour sélectionner l'image -->
+    <input type="file" id="fileInput" accept="image/*" onchange="previewImage()" />
+    
+    <!-- Bouton pour soumettre l'image et effectuer la prédiction -->
+    <button onclick="submitImage()">Upload and Predict</button>
+
+    <!-- Zone pour afficher l'image sélectionnée -->
+    <h3>Selected Image:</h3>
+    <img id="imagePreview" style="max-width: 300px; max-height: 300px; border: 1px solid #ccc; margin-top: 10px;" />
+
+    <!-- Affichage de la prédiction -->
+    <h2>Prediction: <span id="prediction"></span></h2>
+
+    <script>
+        // Fonction pour afficher un aperçu de l'image sélectionnée
+        function previewImage() {
+            const fileInput = document.getElementById("fileInput");
+            const imagePreview = document.getElementById("imagePreview");
+
+            // Si un fichier est sélectionné
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    // Afficher l'image dans la balise <img>
+                    imagePreview.src = e.target.result;
+                };
+
+                // Lire le fichier en tant qu'URL de données
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        }
+
+        // Fonction pour soumettre l'image et faire la prédiction
+        async function submitImage() {
+            const fileInput = document.getElementById("fileInput");
+            const predictionElement = document.getElementById("prediction");
+            
+            if (fileInput.files.length === 0) {
+                alert("Please select an image file.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            try {
+                const response = await fetch("http://localhost:5000/predict", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log("Response from backend:", data); // Ajoute ce log pour voir la réponse brute
+                predictionElement.textContent = data.prediction; // Assure-toi que 'prediction' existe bien
+            } catch (error) {
+                console.error("Error during prediction:", error);
+                predictionElement.textContent = "Error during prediction.";
+            }
+        }
+    </script>
+</body>
+</html>
