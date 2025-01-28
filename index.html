@@ -15,8 +15,12 @@
     <button onclick="submitImage()">Upload and Predict</button>
 
     <!-- Zone pour afficher l'image sélectionnée -->
-    <h3>Selected Image:</h3>
+    <h3>Original Image:</h3>
     <img id="imagePreview" style="max-width: 300px; max-height: 300px; border: 1px solid #ccc; margin-top: 10px;" />
+
+    <!-- Zone pour afficher l'image prétraitée -->
+    <h3>Processed Image:</h3>
+    <img id="processedImagePreview" style="max-width: 300px; max-height: 300px; border: 1px solid #ccc; margin-top: 10px;" />
 
     <!-- Affichage de la prédiction -->
     <h2>Prediction: <span id="prediction"></span></h2>
@@ -45,6 +49,8 @@
         async function submitImage() {
             const fileInput = document.getElementById("fileInput");
             const predictionElement = document.getElementById("prediction");
+            const imagePreview = document.getElementById("imagePreview");
+            const processedImagePreview = document.getElementById("processedImagePreview");
             
             if (fileInput.files.length === 0) {
                 alert("Please select an image file.");
@@ -67,6 +73,15 @@
                 const data = await response.json();
                 console.log("Response from backend:", data); // Ajoute ce log pour voir la réponse brute
                 predictionElement.textContent = data.prediction; // Assure-toi que 'prediction' existe bien
+
+                // Afficher l'image d'origine
+                const originalImage = fileInput.files[0];
+                const imageUrl = URL.createObjectURL(originalImage);
+                imagePreview.src = imageUrl;
+
+                // Afficher l'image prétraitée
+                processedImagePreview.src = `data:image/png;base64,${data.image}`;
+
             } catch (error) {
                 console.error("Error during prediction:", error);
                 predictionElement.textContent = "Error during prediction.";
